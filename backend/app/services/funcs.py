@@ -61,7 +61,7 @@ def get_weight_of_suspension_strut(
 
 def get_stiffness_of_suspension_summ(
         draught: float,
-        weight_of_suspension_strut: int) -> float:
+        weight_of_suspension_strut: float) -> float:
     """ Получить жесткость пружин стойки суммарная (Н/см) """
 
     return (weight_of_suspension_strut / draught) * 10
