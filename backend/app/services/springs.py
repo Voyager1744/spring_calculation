@@ -1,133 +1,219 @@
-from backend.app.services import funcs
-
-
-class Auto:
+class Springs:
+    """ Модель пружины. """
 
     def __init__(self,
-                 weight_on_front_axle: int,
-                 weight_on_back_axle: int,
-                 weight_not_sus_axle_front: int,
-                 weight_not_sus_axel_back: int,
-                 weight_wheel_front: int,
-                 weight_wheel_back: int,
-                 spring_stroke_front: int,
-                 spring_stroke_back: int,
-                 draught_in_percent_front: int,
-                 draught_in_percent_back: int
+                 front_axle: int = 780,  # Вес на оси (кг)
+                 back_axle: int = 620,  # Вес на оси (кг)
+                 not_sus_axle_front: int = 130,  # Вес моста
+                 not_sus_axle_back: int = 110,  # Вес моста
+                 wheel_front: int = 40,  # Вес колеса
+                 wheel_back: int = 40,  # Вес колеса
+                 spring_stroke_front: int = 325,  # Ход стойки
+                 spring_stroke_back: int = 325,  # Ход стойки
+                 height_front: int = 800,  # Высота стойки
+                 height_back: int = 800,  # Высота стойки
+                 draught_in_percent_front: int = 50,  # Осадка в %
+                 draught_in_percent_back: int = 50  # Осадка в %
                  ):
-        self.weight_on_front_axle = weight_on_front_axle
-        self.weight_on_back_axle = weight_on_back_axle
-        self.weight_not_sus_axle_front = weight_not_sus_axle_front
-        self.weight_not_sus_axel_back = weight_not_sus_axel_back
-        self.weight_wheel_front = weight_wheel_front
-        self.weight_wheel_back = weight_wheel_back
-        self.spring_stroke_front = spring_stroke_front
-        self.spring_stroke_back = spring_stroke_back
-        self.draught_in_percent_front = draught_in_percent_front
-        self.draught_in_percent_back = draught_in_percent_back
+        self.front_axle = front_axle  # Вес на оси (кг)
+        self.back_axle = back_axle  # Вес на оси (кг)
+        self.not_sus_axle_front = not_sus_axle_front  # Вес моста
+        self.not_sus_axle_back = not_sus_axle_back  # Вес моста
+        self.wheel_front = wheel_front  # Вес колеса
+        self.wheel_back = wheel_back  # Вес колеса
+        self.spring_stroke_front = spring_stroke_front  # Ход стойки
+        self.spring_stroke_back = spring_stroke_back  # Ход стойки
+        self.height_front = height_front  # Высота стойки
+        self.height_back = height_back  # Высота стойки
+        self.draught_in_percent_front = draught_in_percent_front  # Осадка в %
+        self.draught_in_percent_back = draught_in_percent_back  # Осадка в %
 
-
-class Springs(Auto):
-    def __init__(self,
-                 weight_on_front_axle: int,
-                 weight_on_back_axle: int,
-                 weight_not_sus_axle_front: int,
-                 weight_not_sus_axel_back: int,
-                 weight_wheel_front: int,
-                 weight_wheel_back: int,
-                 spring_stroke_front: int,
-                 spring_stroke_back: int,
-                 draught_in_percent_front: int,
-                 draught_in_percent_back: int
-                 ):
-        super().__init__(
-            weight_on_front_axle,
-            weight_on_back_axle,
-            weight_not_sus_axle_front,
-            weight_not_sus_axel_back,
-            weight_wheel_front,
-            weight_wheel_back,
-            spring_stroke_front,
-            spring_stroke_back,
-            draught_in_percent_front,
-            draught_in_percent_back,
-        )
         # Полная масса автомобиля
-        self.full_mass = funcs.get_gross_vehicle_weight(
-            weight_on_front_axle, weight_on_back_axle
+        self.full_mass = front_axle + back_axle
+
+        # Неподрессоренная масса (кг)
+        self.full_mass_not_sus = sum(
+            (self.not_sus_axle_front,
+             self.not_sus_axle_back,
+             self.wheel_front * 2,
+             self.wheel_back * 2)
         )
 
         # Развесовка в %
-        self.weight_distribution_front = funcs.get_weight_distribution(
-            self.full_mass,
-            self.weight_on_front_axle)
-
-        self.weight_distribution_back = funcs.get_weight_distribution(
-            self.full_mass,
-            self.weight_on_back_axle)
-
-        # Неподрессоренная масса (кг)
-        self.unsprung_mass_axle_front = funcs.get_unsprung_mass_axle(
-            self.weight_not_sus_axle_front, self.weight_wheel_front
+        self.distribution_front = (
+                self.front_axle / (self.full_mass / 100)
+        )
+        self.distribution_back = (
+                100 - self.distribution_front
         )
 
-        self.unsprung_mass_axle_back = funcs.get_unsprung_mass_axle(
-            self.weight_not_sus_axel_back, self.weight_wheel_back
+        # Неподрессоренные массы (кг)
+        self.not_sus_mass_axle_front = (
+                self.not_sus_axle_front + self.wheel_front * 2
+        )
+        self.not_sus_mass_axle_back = (
+                self.not_sus_axle_back + self.wheel_back * 2
         )
 
         # Осадка (мм)
-        self.draught_front = funcs.get_draught(
-            self.spring_stroke_front, self.draught_in_percent_front
+        self.draught_front = (
+                self.spring_stroke_front / 100 * self.draught_in_percent_front
         )
-
-        self.draught_back = funcs.get_draught(
-            self.spring_stroke_back, self.draught_in_percent_back
+        self.draught_back = (
+                self.spring_stroke_back / 100 * self.draught_in_percent_back
         )
 
         # Масса на стойку (кг)
-        self.weight_of_suspension_strut_front = (
-            funcs.get_weight_of_suspension_strut(
-                self.weight_on_front_axle,
-                self.unsprung_mass_axle_front
-            )
+        self.mass_on_strut_front = (
+                (self.front_axle - self.not_sus_mass_axle_front) / 2
+        )
+        self.mass_on_strut_back = (
+                (self.back_axle - self.not_sus_mass_axle_back) / 2
         )
 
-        self.weight_of_suspension_strut_back = (
-            funcs.get_weight_of_suspension_strut(
-                self.weight_on_back_axle,
-                self.unsprung_mass_axle_back
-            )
+        # Жесткость пружин стойки суммарная (Н/см)
+        self.stiff_summ_front_exact = (  # Точная
+                (self.mass_on_strut_front / self.draught_front) * 10
         )
+        self.stiff_summ_front_round = (  # Округленная
+            int(self.stiff_summ_front_exact)
+        )
+
+        self.stiff_summ_back_exact = (  # Точная
+                (self.mass_on_strut_back / self.draught_back) * 10
+        )
+        self.stiff_summ_back_round = (  # Округленная
+            int(self.stiff_summ_back_exact)
+        )
+
+        # Жесткость передних пружин (Н/см)
+
+        self.stiff_front_top_exact = (  # Верхняя пружина точная
+                12 * self.stiff_summ_front_exact / 7
+        )
+        self.stiff_front_top_round = (  # Верхняя пружина округленная
+            int(self.stiff_front_top_exact)
+        )
+        self.stiff_front_top_cat = (  # Верхняя пружина каталожная
+                (self.stiff_front_top_round // 5) * 5
+        )
+
+        self.stiff_front_bottom_exact = (  # Нижняя пружина точная
+                self.stiff_front_top_exact * 1.4
+        )
+        self.stiff_front_bottom_round = (  # Нижняя пружина округленная
+            int(self.stiff_front_bottom_exact)
+        )
+        self.stiff_front_bottom_cat = (  # Нижняя пружина каталожная
+                (self.stiff_front_bottom_round // 5) * 5
+        )
+
+        # Жесткость задних пружин (Н/см)
+
+        self.stiff_back_top_exact = (  # Верхняя пружина точная
+                12 * self.stiff_summ_back_exact / 7
+        )
+        self.stiff_back_top_round = (  # Верхняя пружина округленная
+            int(self.stiff_back_top_exact)
+        )
+        self.stiff_back_top_cat = (  # Верхняя пружина каталожная
+                (self.stiff_back_top_round // 5) * 5
+        )
+
+        self.stiff_back_bottom = (  # Нижняя пружина точная
+                self.stiff_back_top_exact * 1.4
+        )
+        self.stiff_back_bottom_round = (  # Нижняя пружина округленная
+            int(self.stiff_back_bottom)
+        )
+        self.stiff_back_bottom_cat = (  # Нижняя пружина каталожная
+                (self.stiff_back_bottom_round // 5) * 5
+        )
+
+        # Жесткость передней стойки суммарная (Н/см) Каталог
+        self.stiff_summ_front_cat = int(
+            (self.stiff_front_top_cat * self.stiff_front_bottom_cat) /
+            (self.stiff_front_top_cat + self.stiff_front_bottom_cat)
+        )
+        # Жесткость задней стойки суммарная (Н/см) Каталог
+        self.stiff_summ_back_cat = int(
+            (self.stiff_back_top_cat * self.stiff_back_bottom_cat) /
+            (self.stiff_back_top_cat + self.stiff_back_bottom_cat)
+        )
+
+    def get_summary_data(self):
+        """ Сводные данные """
+
+        return {
+            "Полная мааса автомобиля(кг)": self.full_mass,
+            "Неподрессоренная масса (кг)": self.full_mass_not_sus,
+            "Передние пружины верхняя (Н/мм)": self.stiff_front_top_cat,
+            "Передние пружины нижняя (Н/мм)": self.stiff_front_bottom_cat,
+            "Задние пружины верхняя (Н/мм)": self.stiff_back_top_cat,
+            "Задние пружины нижняя (Н/мм)": self.stiff_back_bottom_cat
+        }
+
+    def get_calculation_of_spring_stiffness(self):
+        """ Детальный расчет жесткости пружин. """
+
+        context = {
+            "Жесткость пружин стойки суммарная (Н/см)": {
+                "Передняя": {
+                    "точная": self.stiff_summ_front_exact,
+                    "округленная": self.stiff_summ_front_round,
+                    "каталожная": self.stiff_summ_front_cat,
+                },
+                "Задняя": {
+                    "точная": self.stiff_summ_back_exact,
+                    "округленная": self.stiff_summ_back_round,
+                    "каталожная": self.stiff_summ_back_cat
+                }
+
+            },
+            "Жесткость передних пружин (Н/см)": {
+                "Верхняя": {
+                    "точная": self.stiff_front_top_exact,
+                    "округленная": self.stiff_front_top_round,
+                    "каталожная": self.stiff_front_top_cat
+                },
+                "Нижняя": {
+                    "точная": self.stiff_front_bottom_exact,
+                    "округленная": self.stiff_front_bottom_round,
+                    "каталожная": self.stiff_front_bottom_cat
+                }
+            },
+            "Жесткость задних пружин (Н/см)": {
+                "Верхняя": {
+                    "точная": self.stiff_back_top_exact,
+                    "округленная": self.stiff_back_top_round,
+                    "каталожная": self.stiff_back_top_cat
+                },
+                "Нижняя": {
+                    "точная": self.stiff_back_bottom,
+                    "округленная": self.stiff_back_bottom_round,
+                    "каталожная": self.stiff_back_bottom_cat
+                }
+            }
+
+        }
+        return context
 
 
 def main():
-    test_params = {
-        'weight_on_front_axle': 780,
-        'weight_on_back_axle': 620,
-        'weight_not_sus_axle_front': 130,
-        'weight_not_sus_axel_back': 110,
-        'weight_wheel_front': 40,
-        'weight_wheel_back': 40,
-        'spring_stroke_front': 325,
-        'spring_stroke_back': 325,
-        'draught_in_percent_front': 50,
-        'draught_in_percent_back': 50
-    }
-    a = Springs(**test_params)
-    print(a.weight_distribution_front, a.weight_distribution_back)
-    print(a.unsprung_mass_axle_front, a.unsprung_mass_axle_back)
-    print(a.draught_front, a.draught_back)
-    print(a.weight_of_suspension_strut_front, a.weight_of_suspension_strut_back)
+    s = Springs()
 
-    stiff_front = funcs.get_stiffness_of_suspension_summ(
-        a.draught_front,
-        a.weight_of_suspension_strut_front
-    )
-    stiff_back = funcs.get_stiffness_of_suspension_summ(
-        a.draught_back,
-        a.weight_of_suspension_strut_back
-    )
-    print(f'{stiff_front:.3f}', f'{stiff_back:.3f}')
+    print(s.full_mass)
+    print(s.full_mass_not_sus)
+
+    print(f"{s.distribution_front:.5f}", f"{s.distribution_back:.5f}")
+    print(s.draught_front, s.draught_back)
+    print(s.mass_on_strut_front, s.mass_on_strut_back)
+
+    for i in s.get_summary_data():
+        print(f"{i}: {s.get_summary_data()[i]}")
+
+    for i in s.get_calculation_of_spring_stiffness():
+        print(f"{i}: {s.get_calculation_of_spring_stiffness()[i]}")
 
 
 main()
