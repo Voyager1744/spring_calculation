@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Spring Model</title>
+</head>
+<body>
+  <h1>Spring Model</h1>
+
+  <form id="springForm">
+    <label for="frontAxle">Front Axle Weight (kg):</label>
+    <input type="number" id="frontAxle" name="frontAxle" required><br>
+
+    <label for="backAxle">Back Axle Weight (kg):</label>
+    <input type="number" id="backAxle" name="backAxle" required><br>
+
+    <label for="notSusAxleFront">Weight of Front Non-Suspended Axle (kg):</label>
+    <input type="number" id="notSusAxleFront" name="notSusAxleFront" required><br>
+
+    <label for="notSusAxleBack">Weight of Back Non-Suspended Axle (kg):</label>
+    <input type="number" id="notSusAxleBack" name="notSusAxleBack" required><br>
+
+    <label for="wheelFront">Weight of Front Wheel (kg):</label>
+    <input type="number" id="wheelFront" name="wheelFront" required><br>
+
+    <label for="wheelBack">Weight of Back Wheel (kg):</label>
+    <input type="number" id="wheelBack" name="wheelBack" required><br>
+
+    <label for="springStrokeFront">Front Spring Stroke (mm):</label>
+    <input type="number" id="springStrokeFront" name="springStrokeFront" required><br>
+
+    <label for="springStrokeBack">Back Spring Stroke (mm):</label>
+    <input type="number" id="springStrokeBack" name="springStrokeBack" required><br>
+
+    <label for="heightFront">Front Height (mm):</label>
+    <input type="number" id="heightFront" name="heightFront" required><br>
+
+    <label for="heightBack">Back Height (mm):</label>
+    <input type="number" id="heightBack" name="heightBack" required><br>
+
+    <label for="draughtInPercentFront">Front Draught (%)</label>
+    <input type="number" id="draughtInPercentFront" name="draughtInPercentFront" required><br>
+
+    <label for="draughtInPercentBack">Back Draught (%)</label>
+    <input type="number" id="draughtInPercentBack" name="draughtInPercentBack" required><br>
+
+    <button type="submit">Calculate</button>
+  </form>
+
+  <div id="result"></div>
+
+  <script>
+    document.getElementById("springForm").addEventListener("submit", function(event) {
+      event.preventDefault();
+
+      const frontAxle = parseInt(document.getElementById("frontAxle").value);
+      const backAxle = parseInt(document.getElementById("backAxle").value);
+      const notSusAxleFront = parseInt(document.getElementById("notSusAxleFront").value);
+      const notSusAxleBack = parseInt(document.getElementById("notSusAxleBack").value);
+      const wheelFront = parseInt(document.getElementById("wheelFront").value);
+      const wheelBack = parseInt(document.getElementById("wheelBack").value);
+      const springStrokeFront = parseInt(document.getElementById("springStrokeFront").value);
+      const springStrokeBack = parseInt(document.getElementById("springStrokeBack").value);
+      const heightFront = parseInt(document.getElementById("heightFront").value);
+      const heightBack = parseInt(document.getElementById("heightBack").value);
+      const draughtInPercentFront = parseInt(document.getElementById("draughtInPercentFront").value);
+      const draughtInPercentBack = parseInt(document.getElementById("draughtInPercentBack").value);
+
+      // Perform calculations
+      const fullMass = frontAxle + backAxle;
+      const fullMassNotSus = notSusAxleFront + notSusAxleBack + wheelFront * 2 + wheelBack * 2;
+      const distributionFront = frontAxle / (fullMass / 100);
+      const distributionBack = 100 - distributionFront;
+      const notSusMassAxleFront = notSusAxleFront + wheelFront * 2;
+      const notSusMassAxleBack = notSusAxleBack + wheelBack * 2;
+      const draughtFront = (springStrokeFront / 100) * draughtInPercentFront;
+      const draughtBack = (springStrokeBack / 100) * draughtInPercentBack;
+      const massOnStrutFront = (frontAxle - notSusMassAxleFront) / 2;
+      const massOnStrutBack = (backAxle - notSusMassAxleBack) / 2;
+      const stiffSummFrontExact = (massOnStrutFront / draughtFront) * 10;
+      const stiffSummFrontRound = Math.round(stiffSummFrontExact);
+      const stiffSummBackExact = (massOnStrutBack / draughtBack) * 10;
+      const stiffSummBackRound = Math.round(stiffSummBackExact);
+      const stiffFrontTopExact = (12 * stiffSummFrontExact) / 7;
+      const stiffFrontTopRound = Math.round(stiffFrontTopExact);
+      const stiffFrontTopCat = Math.floor(stiffFrontTopRound / 5) * 5;
+      const stiffFrontBottomExact = stiffFrontTopExact * 1.4;
+      const stiffFrontBottomRound = Math.round(stiffFrontBottomExact);
+      const stiffFrontBottomCat = Math.floor(stiffFrontBottomRound / 5) * 5;
+      const stiffBackTopExact = (12 * stiffSummBackExact) / 7;
+      const stiffBackTopRound = Math.round(stiffBackTopExact);
+      const stiffBackTopCat = Math.floor(stiffBackTopRound / 5) * 5;
+      const stiffBackBottom = stiffBackTopExact * 1.4;
+      const stiffBackBottomRound = Math.round(stiffBackBottom);
+      const stiffBackBottomCat = Math.floor(stiffBackBottomRound / 5) * 5;
+      const stiffSummFrontCat = Math.round((stiffFrontTopCat * stiffFrontBottomCat) / (stiffFrontTopCat + stiffFrontBottomCat));
+      const stiffSummBackCat = Math.round((stiffBackTopCat * stiffBackBottomCat) / (stiffBackTopCat + stiffBackBottomCat));
+
+      // Display the results
+      const resultDiv = document.getElementById("result");
+      resultDiv.innerHTML = `
+        <h2>Results</h2>
+        <p>Full Mass: ${fullMass} kg</p>
+        <p>Full Mass (Non-Suspended): ${fullMassNotSus} kg</p>
+        <p>Distribution (Front): ${distributionFront}%</p>
+        <p>Distribution (Back): ${distributionBack}%</p>
+        <p>Not Suspended Mass (Front Axle): ${notSusMassAxleFront} kg</p>
+        <p>Not Suspended Mass (Back Axle): ${notSusMassAxleBack} kg</p>
+        <p>Draught (Front): ${draughtFront} mm</p>
+        <p>Draught (Back): ${draughtBack} mm</p>
+        <p>Mass on Strut (Front): ${massOnStrutFront} kg</p>
+        <p>Mass on Strut (Back): ${massOnStrutBack} kg</p>
+        <p>Stiffness (Front Summ Exact): ${stiffSummFrontExact} N/cm</p>
+        <p>Stiffness (Front Summ Round): ${stiffSummFrontRound} N/cm</p>
+        <p>Stiffness (Back Summ Exact): ${stiffSummBackExact} N/cm</p>
+        <p>Stiffness (Back Summ Round): ${stiffSummBackRound} N/cm</p>
+        <p>Stiffness (Front Top Exact): ${stiffFrontTopExact} N/cm</p>
+        <p>Stiffness (Front Top Round): ${stiffFrontTopRound} N/cm</p>
+        <p>Stiffness (Front Top Catalog): ${stiffFrontTopCat} N/cm</p>
+        <p>Stiffness (Front Bottom Exact): ${stiffFrontBottomExact} N/cm</p>
+        <p>Stiffness (Front Bottom Round): ${stiffFrontBottomRound} N/cm</p>
+        <p>Stiffness (Front Bottom Catalog): ${stiffFrontBottomCat} N/cm</p>
+        <p>Stiffness (Back Top Exact): ${stiffBackTopExact} N/cm</p>
+        <p>Stiffness (Back Top Round): ${stiffBackTopRound} N/cm</p>
+        <p>Stiffness (Back Top Catalog): ${stiffBackTopCat} N/cm</p>
+        <p>Stiffness (Back Bottom Exact): ${stiffBackBottom} N/cm</p>
+        <p>Stiffness (Back Bottom Round): ${stiffBackBottomRound} N/cm</p>
+        <p>Stiffness (Back Bottom Catalog): ${stiffBackBottomCat} N/cm</p>
+        <p>Stiffness (Front Summ Catalog): ${stiffSummFrontCat} N/cm</p>
+        <p>Stiffness (Back Summ Catalog): ${stiffSummBackCat} N/cm</p>
+      `;
+    });
+  </script>
+</body>
+</html>

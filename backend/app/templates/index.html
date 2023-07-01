@@ -1,0 +1,301 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <title>Калькулятор пружин</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+    }
+
+    h1 {
+      text-align: center;
+    }
+
+    form {
+      max-width: 500px;
+      margin: 0 auto;
+    }
+
+    input[type="number"] {
+      width: 100%;
+      padding: 10px;
+      margin-bottom: 10px;
+    }
+
+    button {
+      width: 100%;
+      padding: 10px;
+      background-color: #4CAF50;
+      color: white;
+      border: none;
+      cursor: pointer;
+    }
+
+    #result {
+      max-width: 800px;
+      margin: 20px auto;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+    }
+
+    table th,
+    table td {
+      padding: 8px;
+      text-align: left;
+      border-bottom: 1px solid #ddd;
+    }
+
+    table th {
+      background-color: #f2f2f2;
+    }
+  </style>
+</head>
+<body>
+  <h1>Калькулятор пружин</h1>
+  <form>
+    <label for="frontAxle">Вес на оси (передняя) (kg):</label>
+    <input type="number" id="frontAxle" required>
+
+    <label for="backAxle">Вес на оси (задняя) (kg):</label>
+    <input type="number" id="backAxle" required>
+
+    <label for="notSusAxleFront">Вес моста (Передний) (kg):</label>
+    <input type="number" id="notSusAxleFront" required>
+
+    <label for="notSusAxleBack">Вес моста (Задний) (kg):</label>
+    <input type="number" id="notSusAxleBack" required>
+
+    <label for="wheelFront">Вес колеса (переднее) (kg):</label>
+    <input type="number" id="wheelFront" required>
+
+    <label for="wheelBack">Вес колеса (задние) (kg):</label>
+    <input type="number" id="wheelBack" required>
+
+    <label for="springStrokeFront">Ход стойки (передняя) (mm):</label>
+    <input type="number" id="springStrokeFront" required>
+
+    <label for="springStrokeBack">Ход стойки (задняя) (mm):</label>
+    <input type="number" id="springStrokeBack" required>
+
+    <label for="heightFront">Высота стойки (передняя) (mm):</label>
+    <input type="number" id="heightFront" required>
+
+    <label for="heightBack">Высота стойки (задняя) (mm):</label>
+    <input type="number" id="heightBack" required>
+
+    <label for="draughtInPercentFront">Осадка (Передняя) (%):</label>
+    <input type="number" id="draughtInPercentFront" required>
+
+    <label for="draughtInPercentBack">Осадка (Передняя) (%):</label>
+    <input type="number" id="draughtInPercentBack" required>
+
+    <button type="button" id="calculateBtn">Рассчитать</button>
+  </form>
+
+  <div id="result"></div>
+
+  <script>
+    const calculateBtn = document.getElementById('calculateBtn');
+    calculateBtn.addEventListener('click', () => {
+      const frontAxle = parseInt(document.getElementById('frontAxle').value);
+      const backAxle = parseInt(document.getElementById('backAxle').value);
+      const notSusAxleFront = parseInt(document.getElementById('notSusAxleFront').value);
+      const notSusAxleBack = parseInt(document.getElementById('notSusAxleBack').value);
+      const wheelFront = parseInt(document.getElementById('wheelFront').value);
+      const wheelBack = parseInt(document.getElementById('wheelBack').value);
+      const springStrokeFront = parseInt(document.getElementById('springStrokeFront').value);
+      const springStrokeBack = parseInt(document.getElementById('springStrokeBack').value);
+      const heightFront = parseInt(document.getElementById('heightFront').value);
+      const heightBack = parseInt(document.getElementById('heightBack').value);
+      const draughtInPercentFront = parseInt(document.getElementById('draughtInPercentFront').value);
+      const draughtInPercentBack = parseInt(document.getElementById('draughtInPercentBack').value);
+
+      const fullMass = frontAxle + backAxle;
+      const fullMassNotSus = notSusAxleFront + notSusAxleBack + wheelFront * 2 + wheelBack * 2;
+      const distributionFront = frontAxle / (fullMass / 100);
+      const distributionBack = 100 - distributionFront;
+      const notSusMassAxleFront = notSusAxleFront + wheelFront * 2;
+      const notSusMassAxleBack = notSusAxleBack + wheelBack * 2;
+      const draughtFront = (springStrokeFront / 100) * draughtInPercentFront;
+      const draughtBack = (springStrokeBack / 100) * draughtInPercentBack;
+      const massOnStrutFront = (frontAxle - notSusMassAxleFront) / 2;
+      const massOnStrutBack = (backAxle - notSusMassAxleBack) / 2;
+      const stiffSummFrontExact = (massOnStrutFront / draughtFront) * 10;
+      const stiffSummFrontRound = Math.floor(stiffSummFrontExact);
+      const stiffSummBackExact = (massOnStrutBack / draughtBack) * 10;
+      const stiffSummBackRound = Math.floor(stiffSummBackExact);
+      const stiffFrontTopExact = (12 * stiffSummFrontExact) / 7;
+      const stiffFrontTopRound = Math.floor(stiffFrontTopExact);
+      const stiffFrontTopCat = Math.floor(stiffFrontTopRound / 5) * 5;
+      const stiffFrontBottomExact = stiffFrontTopExact * 1.4;
+      const stiffFrontBottomRound = Math.floor(stiffFrontBottomExact);
+      const stiffFrontBottomCat = Math.floor(stiffFrontBottomRound / 5) * 5;
+      const stiffBackTopExact = (12 * stiffSummBackExact) / 7;
+      const stiffBackTopRound = Math.floor(stiffBackTopExact);
+      const stiffBackTopCat = Math.floor(stiffBackTopRound / 5) * 5;
+      const stiffBackBottom = stiffBackTopExact * 1.4;
+      const stiffBackBottomRound = Math.floor(stiffBackBottom);
+      const stiffBackBottomCat = Math.floor(stiffBackBottomRound / 5) * 5;
+      const stiffSummFrontCat = Math.floor((stiffFrontTopCat * stiffFrontBottomCat) / (stiffFrontTopCat + stiffFrontBottomCat));
+      const stiffSummBackCat = Math.floor((stiffBackTopCat * stiffBackBottomCat) / (stiffBackTopCat + stiffBackBottomCat));
+
+      const resultTable = document.createElement('table');
+      resultTable.innerHTML = `
+        <tr>
+          <th>Параметр</th>
+          <th>Значение</th>
+        </tr>
+        <tr>
+          <td>Полная масса автомобиля (кг)</td>
+          <td>${fullMass}</td>
+        </tr>
+        <tr>
+          <td>Неподрессоренная масса (кг)</td>
+          <td>${fullMassNotSus}</td>
+        </tr>
+        <tr>
+          <td>Разаесовка (передняя) (%)</td>
+          <td>${distributionFront.toFixed(2)}</td>
+        </tr>
+        <tr>
+          <td>Разаесовка (задняя) (%)</td>
+          <td>${distributionBack.toFixed(2)}</td>
+        </tr>
+        <tr>
+          <td>Неподрессоренная масса (перед) (kg)</td>
+          <td>${notSusMassAxleFront}</td>
+        </tr>
+        <tr>
+          <td>Неподрессоренна масса (зад)(kg)</td>
+          <td>${notSusMassAxleBack}</td>
+        </tr>
+        <tr>
+          <td>Жесткость передней пружины (верхняя) (Каталог) (kg/mm)</td>
+          <td>${stiffFrontTopCat}</td>
+        </tr>
+        <tr>
+          <td>Жесткость передней пружины (нижняя) (Каталог) (kg/mm)</td>
+          <td>${stiffFrontBottomCat}</td>
+        </tr>
+        <tr>
+          <td>Жесткость задней пружины (верхняя) (Каталог) (kg/mm)</td>
+          <td>${stiffBackTopCat}</td>
+        </tr>
+        <tr>
+          <td>Жесткость задней пружины (нижняя) (Каталог) (kg/mm)</td>
+          <td>${stiffBackBottomCat}</td>
+        </tr>
+        <tr>
+          <td>  </td>
+          <td>  </td>
+        </tr>
+
+        <tr>
+          <td>------------Детальный расчет-----------------</td>
+          <td>-------</td>
+        </tr>
+
+        <tr>
+          <td>Осадка (перед) (mm)</td>
+          <td>${draughtFront.toFixed(2)}</td>
+        </tr>
+        <tr>
+          <td>Осадка зад (mm)</td>
+          <td>${draughtBack.toFixed(2)}</td>
+        </tr>
+        <tr>
+          <td>Масса на стойку (перед) (kg)</td>
+          <td>${massOnStrutFront}</td>
+        </tr>
+        <tr>
+          <td>Масса на стойку (зад) (kg)</td>
+          <td>${massOnStrutBack}</td>
+        </tr>
+        <tr>
+          <td>Жесткость пружин стойки суммарная (перед) (точная) (kg/mm)</td>
+          <td>${stiffSummFrontExact.toFixed(2)}</td>
+        </tr>
+        <tr>
+          <td>Жесткость пружин стойки суммарная (перед) (округленная) (kg/mm)</td>
+          <td>${stiffSummFrontRound}</td>
+        </tr>
+        <tr>
+          <td>Жесткость пружин стойки суммарная (перед) (Каталог) (kg/mm)</td>
+          <td>${stiffSummFrontCat}</td>
+        </tr>
+        <tr>
+          <td>Жесткость пружин стойки суммарная (зад) (точная) (kg/mm)</td>
+          <td>${stiffSummBackExact.toFixed(2)}</td>
+        </tr>
+        <tr>
+          <td>Жесткость пружин стойки суммарная (зад) (округленная) (kg/mm)</td>
+          <td>${stiffSummBackRound}</td>
+        </tr>
+        <tr>
+          <td>Жесткость пружин стойки суммарная (зад) (Каталог) (kg/mm)</td>
+          <td>${stiffSummBackCat}</td>
+        </tr>
+        <tr>
+          <td> ____________________________ </td>
+        </tr>
+        <tr>
+          <td>Жесткость передней пружины (верхняя) (точная) (kg/mm)</td>
+          <td>${stiffFrontTopExact.toFixed(2)}</td>
+        </tr>
+        <tr>
+          <td>Жесткость передней пружины (верхняя) (округленная) (kg/mm)</td>
+          <td>${stiffFrontTopRound}</td>
+        </tr>
+        <tr>
+          <td>Жесткость передней пружины (верхняя) (Каталог) (kg/mm)</td>
+          <td>${stiffFrontTopCat}</td>
+        </tr>
+        <tr>
+          <td>Жесткость передней пружины (нижняя) (точная) (kg/mm)</td>
+          <td>${stiffFrontBottomExact.toFixed(2)}</td>
+        </tr>
+        <tr>
+          <td>Жесткость передней пружины (нижняя) (округленная) (kg/mm)</td>
+          <td>${stiffFrontBottomRound}</td>
+        </tr>
+        <tr>
+          <td>Жесткость передней пружины (нижняя) (Каталог) (kg/mm)</td>
+          <td>${stiffFrontBottomCat}</td>
+        </tr>
+        <tr>
+          <td>Жесткость задней пружины (верхняя) (точная) (kg/mm)</td>
+          <td>${stiffBackTopExact.toFixed(2)}</td>
+        </tr>
+        <tr>
+          <td>Жесткость задней пружины (верхняя) (округленная) (kg/mm)</td>
+          <td>${stiffBackTopRound}</td>
+        </tr>
+        <tr>
+          <td>Жесткость задней пружины (верхняя) (Каталог) (kg/mm)</td>
+          <td>${stiffBackTopCat}</td>
+        </tr>
+        <tr>
+          <td>Жесткость задней пружины (нижняя) (точная) (kg/mm)</td>
+          <td>${stiffBackBottom.toFixed(2)}</td>
+        </tr>
+        <tr>
+          <td>Жесткость задней пружины (нижняя) (округленная) (kg/mm)</td>
+          <td>${stiffBackBottomRound}</td>
+        </tr>
+        <tr>
+          <td>Жесткость задней пружины (нижняя) (Каталог) (kg/mm)</td>
+          <td>${stiffBackBottomCat}</td>
+        </tr>
+      `;
+
+      const resultDiv = document.getElementById('result');
+      resultDiv.innerHTML = '';
+      resultDiv.appendChild(resultTable);
+    });
+  </script>
+</body>
+</html>
