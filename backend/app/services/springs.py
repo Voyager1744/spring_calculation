@@ -216,4 +216,5 @@ def main():
         print(f"{i}: {s.get_calculation_of_spring_stiffness()[i]}")
 
 
-main()
+if __name__ == "__main__":
+    main()
