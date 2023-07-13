@@ -29,7 +29,8 @@ async def start(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     """Send a message when the command /start is issued."""
     user = update.effective_user
     await update.message.reply_html(
-        rf"Hi {user.mention_html()}! Введите вес на переднюю ось (кг)",
+        rf"Привет {user.mention_html()}! "
+        "Введите вес на переднюю ось (кг)",
         reply_markup=ForceReply(selective=True),
     )
 
@@ -90,7 +91,7 @@ async def process_calculate(update: Update,
 
         await context.bot.send_message(
             chat_id=update.effective_chat.id,
-            text=result
+            text=process_responses(result)
         )
 
 
@@ -101,22 +102,15 @@ def process_responses(responses) -> str:
     return '\n'.join(user_messages)
 
 
-async def echo(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
-    """Echo the user message."""
-    await update.message.reply_text(update.message.text)
-
-
 async def hello(update: Update, context):
     text = 'Расчет пружин: необходимо последовательно ввести параметры'
     await context.bot.send_message(chat_id=update.effective_chat.id, text=text)
 
 
 def main():
-    s = Springs()
     application = Application.builder().token(TOKEN_BOT).build()
     application.add_handler(CommandHandler('start', start))
-    # application.add_handler(
-    #     MessageHandler(filters.TEXT & ~filters.COMMAND, echo))
+
     application.add_handler(
         CallbackQueryHandler(process_calculate)
     )
