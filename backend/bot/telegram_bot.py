@@ -28,11 +28,15 @@ logger = logging.getLogger(__name__)
 async def start(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     """Send a message when the command /start is issued."""
     user = update.effective_user
-    await update.message.reply_html(
-        rf"Привет {user.mention_html()}! "
-        "Введите вес на переднюю ось (кг)",
-        reply_markup=ForceReply(selective=True),
-    )
+    messages = (f"Привет {user.mention_html()}\n"
+                "Я помогу рассчитать пружины.\n"
+                "Необходимо последовательно ввести параметры машины\n"
+                "\n"
+                "Для начала Введите вес на переднюю ось (кг):\n"
+                )
+    await update.message.reply_html(messages,
+                                    reply_markup=ForceReply(selective=True),
+                                    )
 
 
 async def hendle_message(
@@ -84,7 +88,6 @@ async def process_calculate(update: Update,
                             context: ContextTypes.DEFAULT_TYPE) -> None:
     query = update.callback_query
     if query.data == 'calculate':
-
         response = context.chat_data['responses']
         spring_user = Springs(**response)
         result = spring_user.get_summary_data()
