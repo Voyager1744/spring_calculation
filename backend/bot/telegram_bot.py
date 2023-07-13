@@ -41,45 +41,53 @@ async def start(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
 
 async def hendle_message(
         update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
+    """Последовательно принимает сообщения и заносит их в словарь."""
+
     text = update.message.text
     chat_id = update.message.chat_id
     responses = context.chat_data.get('responses', {})
 
-    if 'front_axle' not in responses:
-        responses['front_axle'] = float(text)
-        await update.message.reply_html(
-            "Вес на заднюю ось (кг):",
-        )
-    elif 'back_axle' not in responses:
-        responses['back_axle'] = float(text)
-        await update.message.reply_html(
-            "Вес переднего моста (кг):",
-        )
-    elif 'not_sus_axle_front' not in responses:
-        responses['not_sus_axle_front'] = float(text)
-        await update.message.reply_html(
-            "Вес заднего моста (кг):",
-        )
-    elif 'not_sus_axle_back' not in responses:
-        responses['not_sus_axle_back'] = float(text)
-        await update.message.reply_html(
-            "Вес одного переднего колеса (кг):",
-        )
-    elif 'wheel_front' not in responses:
-        responses['wheel_front'] = float(text)
-        await update.message.reply_html(
-            "Вес одного заднего колеса (кг):",
-        )
+    if text.isdigit():
+        if 'front_axle' not in responses:
+            responses['front_axle'] = float(text)
+            await update.message.reply_html(
+                "Вес на заднюю ось (кг):",
+            )
 
+        elif 'back_axle' not in responses:
+            responses['back_axle'] = float(text)
+            await update.message.reply_html(
+                "Вес переднего моста (кг):",
+            )
+        elif 'not_sus_axle_front' not in responses:
+            responses['not_sus_axle_front'] = float(text)
+            await update.message.reply_html(
+                "Вес заднего моста (кг):",
+            )
+        elif 'not_sus_axle_back' not in responses:
+            responses['not_sus_axle_back'] = float(text)
+            await update.message.reply_html(
+                "Вес одного переднего колеса (кг):",
+            )
+        elif 'wheel_front' not in responses:
+            responses['wheel_front'] = float(text)
+            await update.message.reply_html(
+                "Вес одного заднего колеса (кг):",
+            )
+
+        else:
+            if 'wheel_back' not in responses:
+                responses['wheel_back'] = float(text)
+            keyboard = [
+                [InlineKeyboardButton("Рассчитать", callback_data="calculate")]]
+            reply_markup = InlineKeyboardMarkup(keyboard)
+            await update.message.reply_text("Все сообщения получены!"
+                                            " нажмите кнопку Рассчитать",
+                                            reply_markup=reply_markup)
     else:
-        if 'wheel_back' not in responses:
-            responses['wheel_back'] = float(text)
-        keyboard = [
-            [InlineKeyboardButton("Рассчитать", callback_data="calculate")]]
-        reply_markup = InlineKeyboardMarkup(keyboard)
-        await update.message.reply_text("Все сообщения получены!"
-                                        " нажмите кнопку Рассчитать",
-                                        reply_markup=reply_markup)
+        await update.message.reply_html(
+            "Нужно ввести число!",
+        )
 
     context.chat_data['responses'] = responses
 
